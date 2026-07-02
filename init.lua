@@ -76,47 +76,49 @@ require("lazy").setup({
 
   -- ── Theme ───────────────────────────────────────────────
   {
-    "scottmckendry/cyberdream.nvim",
+    "catppuccin/nvim",
+    name = "catppuccin",
     priority = 1000,
     config = function()
-      require("cyberdream").setup({
-        italic_comments      = true,
-        hide_fillchars       = true,
-        borderless_telescope = true,
-        overrides = function(p)
+      require("catppuccin").setup({
+        flavour = "frappe",
+        styles = {
+          keywords = { "italic" },
+        },
+        custom_highlights = function(p)
           return {
-            Keyword                  = { fg = p.orange,  italic = true },
-            ["@keyword"]             = { fg = p.orange,  italic = true },
-            ["@keyword.function"]    = { fg = p.orange,  italic = true },
-            ["@keyword.return"]      = { fg = p.orange,  italic = true },
-            ["@keyword.import"]      = { fg = p.orange,  italic = true },
-            ["@keyword.modifier"]    = { fg = p.orange,  italic = true },
-            ["@keyword.repeat"]      = { fg = p.magenta, italic = true },
-            ["@keyword.conditional"] = { fg = p.magenta, italic = true },
-            ["@keyword.operator"]    = { fg = p.purple,  italic = true },
+            Keyword                  = { fg = p.peach,  style = { "italic" } },
+            ["@keyword"]             = { fg = p.peach,  style = { "italic" } },
+            ["@keyword.function"]    = { fg = p.peach,  style = { "italic" } },
+            ["@keyword.return"]      = { fg = p.peach,  style = { "italic" } },
+            ["@keyword.import"]      = { fg = p.peach,  style = { "italic" } },
+            ["@keyword.modifier"]    = { fg = p.peach,  style = { "italic" } },
+            ["@keyword.repeat"]      = { fg = p.mauve,  style = { "italic" } },
+            ["@keyword.conditional"] = { fg = p.mauve,  style = { "italic" } },
+            ["@keyword.operator"]    = { fg = p.mauve,  style = { "italic" } },
           }
         end,
       })
-      vim.cmd("colorscheme cyberdream")
+      vim.cmd("colorscheme catppuccin")
     end,
   },
 
   -- ── Status bar ──────────────────────────────────────────
   {
     "nvim-lualine/lualine.nvim",
-    dependencies = { "nvim-tree/nvim-web-devicons", "scottmckendry/cyberdream.nvim" },
+    dependencies = { "nvim-tree/nvim-web-devicons", "catppuccin/nvim" },
     config = function()
       local cd = {
-        cyan    = "#5ef1ff",
-        green   = "#5eff6c",
-        pink    = "#ff5ef1",
-        orange  = "#ffbd5e",
-        red     = "#ff6e5e",
-        purple  = "#bd5eff",
-        bg      = "#16181a",
-        bg_hl   = "#1e2124",
-        fg      = "#ffffff",
-        fg_dark = "#a0a8b0",
+        cyan    = "#99d1db",  -- sky
+        green   = "#a6d189",  -- green
+        pink    = "#f4b8e4",  -- pink
+        orange  = "#ef9f76",  -- peach
+        red     = "#e78284",  -- red
+        purple  = "#ca9ee6",  -- mauve
+        bg      = "#303446",  -- base
+        bg_hl   = "#51576d",  -- surface1
+        fg      = "#c6d0f5",  -- text
+        fg_dark = "#838ba7",  -- overlay2
       }
 
       local theme = {
@@ -147,6 +149,27 @@ require("lazy").setup({
         },
       })
     end,
+  },
+
+  -- ── File explorer ───────────────────────────────────────
+  {
+    "nvim-neo-tree/neo-tree.nvim",
+    branch = "v3.x",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "nvim-tree/nvim-web-devicons",
+      "MunifTanjim/nui.nvim",
+    },
+    keys = {
+      { "<leader>t", "<cmd>Neotree toggle<CR>", desc = "Toggle file tree" },
+    },
+    opts = {
+      window = { width = 30 },
+      filesystem = {
+        follow_current_file = { enabled = true },
+        hijack_netrw_behavior = "open_current",
+      },
+    },
   },
 
   -- ── Git signs ───────────────────────────────────────────
