@@ -92,7 +92,7 @@ require("lazy").setup({
     dependencies = { "nvim-tree/nvim-web-devicons", "rebelot/kanagawa.nvim" },
     config = function()
       local cd = {
-        cyan    = "#7FB4CA",  -- springBlue
+        cyan    = "#7E9CD8",  -- crystalBlue
         green   = "#98BB6C",  -- springGreen
         pink    = "#D27E99",  -- sakuraPink
         orange  = "#FFA066",  -- surimiOrange
