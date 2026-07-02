@@ -1,5 +1,16 @@
+vim.loader.enable()
+
 vim.opt.termguicolors = true
 vim.g.mapleader = " "
+
+-- disable unused built-in plugins
+vim.g.loaded_netrw        = 1
+vim.g.loaded_netrwPlugin  = 1
+vim.g.loaded_tutor        = 1
+vim.g.loaded_2html_plugin = 1
+vim.g.loaded_zipPlugin    = 1
+vim.g.loaded_tarPlugin    = 1
+vim.g.loaded_gzip         = 1
 
 -- ── Bootstrap lazy.nvim ────────────────────────────────────
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
@@ -29,6 +40,8 @@ vim.opt.relativenumber = true
 vim.opt.cursorline    = true
 vim.opt.signcolumn    = "yes"
 vim.opt.updatetime    = 300
+vim.opt.showcmd       = false
+vim.opt.showmode      = false
 
 -- ── Plugins ────────────────────────────────────────────────
 require("lazy").setup({
@@ -36,7 +49,7 @@ require("lazy").setup({
   -- ── Existing plugins (migrated from vim-plug) ───────────
   { "mrcjkb/rustaceanvim", version = "^9", lazy = false },
   "neovim/nvim-lspconfig",
-  { "nvim-treesitter/nvim-treesitter", build = ":TSUpdate" },
+  { "nvim-treesitter/nvim-treesitter", build = ":TSUpdate", event = "BufReadPost" },
 
   {
     "nvim-telescope/telescope.nvim",
@@ -57,8 +70,11 @@ require("lazy").setup({
     end,
   },
 
+  { "hrsh7th/cmp-nvim-lsp" },
+
   {
     "hrsh7th/nvim-cmp",
+    event = "InsertEnter",
     dependencies = { "hrsh7th/cmp-nvim-lsp" },
     config = function()
       local cmp = require("cmp")
@@ -89,6 +105,7 @@ require("lazy").setup({
   -- ── Status bar ──────────────────────────────────────────
   {
     "nvim-lualine/lualine.nvim",
+    event = "VeryLazy",
     dependencies = { "nvim-tree/nvim-web-devicons", "rebelot/kanagawa.nvim" },
     config = function()
       local cd = {
@@ -125,8 +142,21 @@ require("lazy").setup({
             { "filename", file_status = true, path = 1,
               symbols = { modified = "●", readonly = "[-]", unnamed = "[No Name]" },
             },
+            { function()
+                local reg = vim.fn.reg_recording()
+                return reg ~= "" and "recording @" .. reg or ""
+              end,
+            },
           },
-          lualine_x = { "encoding", "fileformat", "filetype" },
+          lualine_x = {
+            { function()
+                local clients = vim.lsp.get_clients({ bufnr = 0 })
+                if #clients == 0 then return "" end
+                return table.concat(vim.tbl_map(function(c) return c.name end, clients), ", ")
+              end,
+            },
+            "selectioncount", "encoding", "fileformat", "filetype",
+          },
           lualine_y = { "progress" },
           lualine_z = { "location" },
         },
@@ -158,6 +188,7 @@ require("lazy").setup({
   -- ── Git signs ───────────────────────────────────────────
   {
     "lewis6991/gitsigns.nvim",
+    event = "BufReadPre",
     config = function()
       require("gitsigns").setup()
     end,
