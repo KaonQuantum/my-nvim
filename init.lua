@@ -76,44 +76,46 @@ require("lazy").setup({
 
   -- ── Theme ───────────────────────────────────────────────
   {
-    "folke/tokyonight.nvim",
+    "rebelot/kanagawa.nvim",
     priority = 1000,
     config = function()
-      require("tokyonight").setup({
-        style = "storm",
-        italic_keywords = true,
-        on_highlights = function(hl, p)
-          hl.Keyword                  = { fg = p.orange,  italic = true }
-          hl["@keyword"]              = { fg = p.orange,  italic = true }
-          hl["@keyword.function"]     = { fg = p.orange,  italic = true }
-          hl["@keyword.return"]       = { fg = p.orange,  italic = true }
-          hl["@keyword.import"]       = { fg = p.orange,  italic = true }
-          hl["@keyword.modifier"]     = { fg = p.orange,  italic = true }
-          hl["@keyword.repeat"]       = { fg = p.purple,  italic = true }
-          hl["@keyword.conditional"]  = { fg = p.purple,  italic = true }
-          hl["@keyword.operator"]     = { fg = p.purple,  italic = true }
+      require("kanagawa").setup({
+        theme = "wave",
+        overrides = function(colors)
+          local p = colors.palette
+          return {
+            Keyword                  = { fg = p.surimiOrange, italic = true },
+            ["@keyword"]             = { fg = p.surimiOrange, italic = true },
+            ["@keyword.function"]    = { fg = p.surimiOrange, italic = true },
+            ["@keyword.return"]      = { fg = p.surimiOrange, italic = true },
+            ["@keyword.import"]      = { fg = p.surimiOrange, italic = true },
+            ["@keyword.modifier"]    = { fg = p.surimiOrange, italic = true },
+            ["@keyword.repeat"]      = { fg = p.springViolet1, italic = true },
+            ["@keyword.conditional"] = { fg = p.springViolet1, italic = true },
+            ["@keyword.operator"]    = { fg = p.springViolet1, italic = true },
+          }
         end,
       })
-      vim.cmd("colorscheme tokyonight")
+      vim.cmd("colorscheme kanagawa-wave")
     end,
   },
 
   -- ── Status bar ──────────────────────────────────────────
   {
     "nvim-lualine/lualine.nvim",
-    dependencies = { "nvim-tree/nvim-web-devicons", "folke/tokyonight.nvim" },
+    dependencies = { "nvim-tree/nvim-web-devicons", "rebelot/kanagawa.nvim" },
     config = function()
       local cd = {
-        cyan    = "#7dcfff",
-        green   = "#9ece6a",
-        pink    = "#bb9af7",
-        orange  = "#ff9e64",
-        red     = "#f7768e",
-        purple  = "#bb9af7",
-        bg      = "#24283b",
-        bg_hl   = "#292e42",
-        fg      = "#c0caf5",
-        fg_dark = "#565f89",
+        cyan    = "#7FB4CA",  -- springBlue
+        green   = "#98BB6C",  -- springGreen
+        pink    = "#D27E99",  -- sakuraPink
+        orange  = "#FFA066",  -- surimiOrange
+        red     = "#E46876",  -- waveRed
+        purple  = "#938AA9",  -- springViolet1
+        bg      = "#1F1F28",  -- sumiInk1
+        bg_hl   = "#2A2A37",  -- sumiInk2
+        fg      = "#DCD7BA",  -- fujiWhite
+        fg_dark = "#727169",  -- fujiGray
       }
 
       local theme = {
