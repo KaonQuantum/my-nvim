@@ -81,20 +81,6 @@ require("lazy").setup({
     config = function()
       require("kanagawa").setup({
         theme = "wave",
-        overrides = function(colors)
-          local p = colors.palette
-          return {
-            Keyword                  = { fg = p.surimiOrange, italic = true },
-            ["@keyword"]             = { fg = p.surimiOrange, italic = true },
-            ["@keyword.function"]    = { fg = p.surimiOrange, italic = true },
-            ["@keyword.return"]      = { fg = p.surimiOrange, italic = true },
-            ["@keyword.import"]      = { fg = p.surimiOrange, italic = true },
-            ["@keyword.modifier"]    = { fg = p.surimiOrange, italic = true },
-            ["@keyword.repeat"]      = { fg = p.springViolet1, italic = true },
-            ["@keyword.conditional"] = { fg = p.springViolet1, italic = true },
-            ["@keyword.operator"]    = { fg = p.springViolet1, italic = true },
-          }
-        end,
       })
       vim.cmd("colorscheme kanagawa-wave")
     end,
@@ -112,8 +98,8 @@ require("lazy").setup({
         orange  = "#FFA066",  -- surimiOrange
         red     = "#E46876",  -- waveRed
         purple  = "#938AA9",  -- springViolet1
-        bg      = "#1F1F28",  -- sumiInk1
-        bg_hl   = "#2A2A37",  -- sumiInk2
+        bg      = "#1F1F28",  -- sumiInk3 (wave bg)
+        bg_hl   = "#2A2A37",  -- sumiInk4
         fg      = "#DCD7BA",  -- fujiWhite
         fg_dark = "#727169",  -- fujiGray
       }
