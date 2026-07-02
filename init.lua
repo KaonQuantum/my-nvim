@@ -76,49 +76,44 @@ require("lazy").setup({
 
   -- ── Theme ───────────────────────────────────────────────
   {
-    "catppuccin/nvim",
-    name = "catppuccin",
+    "folke/tokyonight.nvim",
     priority = 1000,
     config = function()
-      require("catppuccin").setup({
-        flavour = "frappe",
-        styles = {
-          keywords = { "italic" },
-        },
-        custom_highlights = function(p)
-          return {
-            Keyword                  = { fg = p.peach,  style = { "italic" } },
-            ["@keyword"]             = { fg = p.peach,  style = { "italic" } },
-            ["@keyword.function"]    = { fg = p.peach,  style = { "italic" } },
-            ["@keyword.return"]      = { fg = p.peach,  style = { "italic" } },
-            ["@keyword.import"]      = { fg = p.peach,  style = { "italic" } },
-            ["@keyword.modifier"]    = { fg = p.peach,  style = { "italic" } },
-            ["@keyword.repeat"]      = { fg = p.mauve,  style = { "italic" } },
-            ["@keyword.conditional"] = { fg = p.mauve,  style = { "italic" } },
-            ["@keyword.operator"]    = { fg = p.mauve,  style = { "italic" } },
-          }
+      require("tokyonight").setup({
+        style = "storm",
+        italic_keywords = true,
+        on_highlights = function(hl, p)
+          hl.Keyword                  = { fg = p.orange,  italic = true }
+          hl["@keyword"]              = { fg = p.orange,  italic = true }
+          hl["@keyword.function"]     = { fg = p.orange,  italic = true }
+          hl["@keyword.return"]       = { fg = p.orange,  italic = true }
+          hl["@keyword.import"]       = { fg = p.orange,  italic = true }
+          hl["@keyword.modifier"]     = { fg = p.orange,  italic = true }
+          hl["@keyword.repeat"]       = { fg = p.purple,  italic = true }
+          hl["@keyword.conditional"]  = { fg = p.purple,  italic = true }
+          hl["@keyword.operator"]     = { fg = p.purple,  italic = true }
         end,
       })
-      vim.cmd("colorscheme catppuccin")
+      vim.cmd("colorscheme tokyonight")
     end,
   },
 
   -- ── Status bar ──────────────────────────────────────────
   {
     "nvim-lualine/lualine.nvim",
-    dependencies = { "nvim-tree/nvim-web-devicons", "catppuccin/nvim" },
+    dependencies = { "nvim-tree/nvim-web-devicons", "folke/tokyonight.nvim" },
     config = function()
       local cd = {
-        cyan    = "#99d1db",  -- sky
-        green   = "#a6d189",  -- green
-        pink    = "#f4b8e4",  -- pink
-        orange  = "#ef9f76",  -- peach
-        red     = "#e78284",  -- red
-        purple  = "#ca9ee6",  -- mauve
-        bg      = "#303446",  -- base
-        bg_hl   = "#51576d",  -- surface1
-        fg      = "#c6d0f5",  -- text
-        fg_dark = "#838ba7",  -- overlay2
+        cyan    = "#7dcfff",
+        green   = "#9ece6a",
+        pink    = "#bb9af7",
+        orange  = "#ff9e64",
+        red     = "#f7768e",
+        purple  = "#bb9af7",
+        bg      = "#24283b",
+        bg_hl   = "#292e42",
+        fg      = "#c0caf5",
+        fg_dark = "#565f89",
       }
 
       local theme = {
