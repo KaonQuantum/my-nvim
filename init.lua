@@ -164,6 +164,14 @@ require("lazy").setup({
     end,
   },
 
+  -- ── Noice ───────────────────────────────────────────────
+  {
+    "folke/noice.nvim",
+    event = "VeryLazy",
+    dependencies = { "MunifTanjim/nui.nvim", "rcarriga/nvim-notify" },
+    opts = {},
+  },
+
   -- ── File explorer ───────────────────────────────────────
   {
     "nvim-neo-tree/neo-tree.nvim",

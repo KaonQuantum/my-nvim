@@ -69,6 +69,7 @@ Colors are hardcoded to [kanagawa wave](https://github.com/rebelot/kanagawa.nvim
 | neo-tree.nvim | File explorer sidebar |
 | gitsigns.nvim | Git diff signs in gutter |
 | vim-wakatime | Coding time tracking (Hackatime) |
+| noice.nvim | Replaces cmdline/messages with floating UI |
 | brainfuck-vim | Brainfuck syntax support |
 
 ## Rust LSP notes
