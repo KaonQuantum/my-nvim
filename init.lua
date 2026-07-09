@@ -96,13 +96,12 @@ require("lazy").setup({
 
   -- ── Theme ───────────────────────────────────────────────
   {
-    "rebelot/kanagawa.nvim",
+    "catppuccin/nvim",
+    name = "catppuccin",
     priority = 1000,
     config = function()
-      require("kanagawa").setup({
-        theme = "wave",
-      })
-      vim.cmd("colorscheme kanagawa-wave")
+      require("catppuccin").setup({ flavour = "frappe" })
+      vim.cmd("colorscheme catppuccin")
     end,
   },
 
@@ -110,26 +109,26 @@ require("lazy").setup({
   {
     "nvim-lualine/lualine.nvim",
     event = "VeryLazy",
-    dependencies = { "nvim-tree/nvim-web-devicons", "rebelot/kanagawa.nvim" },
+    dependencies = { "nvim-tree/nvim-web-devicons", "catppuccin/nvim" },
     config = function()
       local cd = {
-        cyan    = "#7E9CD8",  -- crystalBlue
-        green   = "#98BB6C",  -- springGreen
-        pink    = "#D27E99",  -- sakuraPink
-        orange  = "#FFA066",  -- surimiOrange
-        red     = "#E46876",  -- waveRed
-        purple  = "#938AA9",  -- springViolet1
-        bg      = "#1F1F28",  -- sumiInk3 (wave bg)
-        bg_hl   = "#2A2A37",  -- sumiInk4
-        fg      = "#DCD7BA",  -- fujiWhite
-        fg_dark = "#727169",  -- fujiGray
+        blue    = "#8caaee",  -- blue
+        green   = "#a6d189",  -- green
+        mauve   = "#ca9ee6",  -- mauve
+        peach   = "#ef9f76",  -- peach
+        red     = "#e78284",  -- red
+        lavender = "#babbf1", -- lavender
+        bg      = "#303446",  -- base
+        bg_hl   = "#414559",  -- surface0
+        fg      = "#c6d0f5",  -- text
+        fg_dark = "#737994",  -- overlay0
       }
 
       local theme = {
-        normal   = { a = { fg = cd.bg, bg = cd.cyan,   gui = "bold" }, b = { fg = cd.cyan,   bg = cd.bg_hl }, c = { fg = cd.fg_dark, bg = cd.bg } },
+        normal   = { a = { fg = cd.bg, bg = cd.blue,   gui = "bold" }, b = { fg = cd.blue,   bg = cd.bg_hl }, c = { fg = cd.fg_dark, bg = cd.bg } },
         insert   = { a = { fg = cd.bg, bg = cd.green,  gui = "bold" }, b = { fg = cd.green,  bg = cd.bg_hl } },
-        visual   = { a = { fg = cd.bg, bg = cd.pink,   gui = "bold" }, b = { fg = cd.pink,   bg = cd.bg_hl } },
-        command  = { a = { fg = cd.bg, bg = cd.orange, gui = "bold" }, b = { fg = cd.orange, bg = cd.bg_hl } },
+        visual   = { a = { fg = cd.bg, bg = cd.mauve,  gui = "bold" }, b = { fg = cd.mauve,  bg = cd.bg_hl } },
+        command  = { a = { fg = cd.bg, bg = cd.peach,  gui = "bold" }, b = { fg = cd.peach,  bg = cd.bg_hl } },
         replace  = { a = { fg = cd.bg, bg = cd.red,    gui = "bold" }, b = { fg = cd.red,    bg = cd.bg_hl } },
         inactive = { a = { fg = cd.fg_dark, bg = cd.bg }, b = { fg = cd.fg_dark, bg = cd.bg }, c = { fg = cd.fg_dark, bg = cd.bg } },
       }
