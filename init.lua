@@ -74,8 +74,8 @@ require("lazy").setup({
 
   {
     "hrsh7th/nvim-cmp",
-    event = "InsertEnter",
-    dependencies = { "hrsh7th/cmp-nvim-lsp" },
+    event = { "InsertEnter", "CmdlineEnter" },
+    dependencies = { "hrsh7th/cmp-nvim-lsp", "hrsh7th/cmp-cmdline" },
     config = function()
       local cmp = require("cmp")
       cmp.setup({
@@ -85,6 +85,10 @@ require("lazy").setup({
           ["<CR>"]    = cmp.mapping.confirm({ select = true }),
         }),
         sources = { { name = "nvim_lsp" } },
+      })
+      cmp.setup.cmdline(":", {
+        mapping = cmp.mapping.preset.cmdline(),
+        sources = { { name = "cmdline" } },
       })
     end,
   },
