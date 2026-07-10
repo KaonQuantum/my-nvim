@@ -30,6 +30,8 @@ Leader key is `Space`.
 | `<leader>ca` | Code action |
 | `<leader>rn` | Rename symbol |
 | `<leader>e` | Show diagnostics float |
+| `]d` / `[d` | Next / prev diagnostic |
+| `]e` / `[e` | Next / prev error only |
 
 ### Telescope (fuzzy finder)
 | Key | Action |
@@ -53,7 +55,7 @@ Leader key is `Space`.
 - LSP shows the active language server for the current file
 - Selection count shows chars/lines selected in visual mode
 
-Colors are hardcoded to [kanagawa wave](https://github.com/rebelot/kanagawa.nvim) palette. If you switch themes, update the hex values in the lualine section of `init.lua`.
+Colors are hardcoded to [catppuccin frappe](https://github.com/catppuccin/nvim) palette. If you switch themes, update the hex values in the lualine section of `init.lua`.
 
 ## Plugins
 
@@ -64,7 +66,7 @@ Colors are hardcoded to [kanagawa wave](https://github.com/rebelot/kanagawa.nvim
 | nvim-treesitter | Syntax highlighting |
 | telescope.nvim | Fuzzy finder |
 | nvim-cmp | Autocomplete |
-| kanagawa.nvim | Colorscheme (wave) |
+| catppuccin | Colorscheme (frappe) |
 | lualine.nvim | Statusline |
 | neo-tree.nvim | File explorer sidebar |
 | gitsigns.nvim | Git diff signs in gutter |
