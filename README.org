@@ -1,0 +1,281 @@
+#+TITLE: nvim config
+#+OPTIONS: toc:2
+
+Neovim config built for Rust development. Uses [[https://github.com/folke/lazy.nvim][lazy.nvim]] for plugin management — plugins auto-install on first launch.
+
+* Install
+
+#+BEGIN_SRC bash
+git clone https://github.com/KaonQuantum/my-nvim.git ~/.config/nvim
+#+END_SRC
+
+Then open Neovim and lazy.nvim will install everything automatically.
+
+** Requirements
+
+- ~git~, ~make~, and a C compiler — needed to build ~telescope-fzf-native.nvim~
+- [[https://github.com/tree-sitter/tree-sitter/blob/master/crates/cli/README.md][tree-sitter CLI]] (0.26.1+, install via your package manager, not npm) — nvim-treesitter compiles parsers with it
+- ~rust-analyzer~, ~cargo~, ~rustc~ on ~$PATH~ — for rustaceanvim
+
+* Keymaps
+
+Leader key is ~Space~. Press ~<leader>~ and wait — which-key.nvim shows all available bindings.
+
+** Cargo
+
+| Key            | Action        |
+|----------------+---------------|
+| ~<leader>cb~   | ~cargo build~ |
+| ~<leader>ct~   | ~cargo test~  |
+| ~<leader>cr~   | ~cargo run~   |
+| ~<leader>cc~   | ~cargo check~ |
+
+** LSP
+
+| Key            | Action                        |
+|----------------+--------------------------------|
+| ~gd~           | Go to definition               |
+| ~K~            | Hover docs                     |
+| ~<leader>ca~   | Code action                    |
+| ~<leader>rn~   | Rename symbol                  |
+| ~<leader>e~    | Show diagnostics float         |
+| ~]d~ / ~[d~    | Next / prev diagnostic         |
+| ~]e~ / ~[e~    | Next / prev error only         |
+
+** Telescope (fuzzy finder)
+
+| Key            | Action                              |
+|----------------+--------------------------------------|
+| ~<leader>ff~   | Find files                           |
+| ~<leader>fg~   | Live grep (search text in project)   |
+| ~<leader>fb~   | Switch buffers                       |
+
+** File explorer (neo-tree)
+
+| Key            | Action              |
+|----------------+---------------------|
+| ~<leader>t~    | Toggle file tree    |
+
+Keys below are neo-tree's own defaults, active only with the cursor inside the tree window:
+
+| Key            | Action                                                   |
+|----------------+-----------------------------------------------------------|
+| ~<CR>~         | Open file / expand directory                              |
+| ~<space>~      | Toggle expand on directory under cursor                   |
+| ~s~ / ~S~ / ~t~| Open in vsplit / split / new tab                          |
+| ~a~            | Add a new file (append ~/~ for a directory)                |
+| ~A~            | Add a new directory                                        |
+| ~d~            | Delete                                                     |
+| ~r~            | Rename                                                     |
+| ~y~ / ~x~ / ~p~| Copy / cut / paste (clipboard)                             |
+| ~c~ / ~m~      | Copy to.. / move to.. (prompts for destination)            |
+| ~H~            | Toggle hidden files                                        |
+| ~/~            | Fuzzy-find within the tree                                 |
+| ~R~            | Refresh                                                    |
+| ~q~            | Close the tree window                                      |
+| ~?~            | Show full help (all mappings, including ones not listed here) |
+
+** mini.surround
+
+| Key                          | Action                                          |
+|-------------------------------+--------------------------------------------------|
+| ~sa{motion/textobj}{char}~   | Add surround (e.g. ~saiw"~ wraps word in quotes) |
+| ~sd{char}~                   | Delete surround                                  |
+| ~sr{char}{char}~             | Replace surround                                 |
+| ~sf{char}~ / ~sF{char}~      | Find surround pair (jump to it)                  |
+| ~sh{char}~                   | Highlight surround pair briefly                  |
+
+** mini.ai (text objects)
+
+Replaces/extends built-in ~i~/~a~ text objects — used after any operator (~d~, ~y~, ~c~) or after mini.surround's ~sa~/~sd~/~sr~.
+
+| Object                        | Meaning                                                                          |
+|-------------------------------+------------------------------------------------------------------------------------|
+| ~ia~ / ~aa~                   | A single function *argument* (splits on top-level commas only)                  |
+| ~if~ / ~af~                   | A function call / its arguments                                                 |
+| ~iw~, ~i(~, ~i"~, ~ip~, etc.  | Same built-ins, but now search nearby lines instead of requiring the cursor to already be inside |
+| ~2i)~                         | Second enclosing level outward (for nested parens/generics)                     |
+
+** mini.splitjoin
+
+| Key   | Action                                                                             |
+|-------+--------------------------------------------------------------------------------------|
+| ~gS~  | Toggle a bracketed, comma-separated construct (call, struct literal, array) between one line and multi-line |
+
+** mini.hipatterns
+
+No keymap — passive. Highlights ~TODO~, ~FIXME~, ~HACK~, ~NOTE~ in comments (each a different color) and renders hex color codes (~#ff8800~) in their actual color.
+
+** mini.indentscope
+
+No keymap required, but exposes:
+
+| Key           | Action                                                                                |
+|---------------+------------------------------------------------------------------------------------------|
+| ~ii~ / ~ai~   | Text object for the current indent scope (e.g. ~dai~ deletes the block cursor is in, including its border lines) |
+| ~[i~ / ~]i~   | Jump to the scope's start / end border                                                |
+
+Draws a vertical guide next to the indented block the cursor is currently in (not every indent level on screen — see notes below).
+
+* Completion & snippets
+
+nvim-cmp pulls completions from the active LSP client (~nvim_lsp~ source) and from LuaSnip's loaded snippets (~luasnip~ source).
+
+| Key                | Action                                       |
+|---------------------+-----------------------------------------------|
+| ~<Tab>~ / ~<S-Tab>~ | Next / previous item in the completion menu  |
+| ~<CR>~              | Confirm the selected item                     |
+
+*Known limitation:* when an LSP completion is snippet-flavored (e.g. rust-analyzer filling in ~Some(${1:value})~ or a function call's arguments), confirming it expands correctly via LuaSnip and drops your cursor in the first placeholder — but there's currently no keymap bound to jump to the /next/ placeholder (LuaSnip's ~jump_next()~/~jump_prev()~). Cursor stays at the first placeholder until you tab/arrow out manually. Worth adding ~<C-j>~/~<C-k>~ (or similar) mapped to LuaSnip's jump functions if multi-placeholder snippets come up often.
+
+* Git signs (gitsigns.nvim)
+
+Configured with ~require("gitsigns").setup()~ and no custom ~on_attach~ — so it currently only draws gutter signs, it does *not* add any hunk-navigation or stage/reset keymaps (gitsigns doesn't bind any on its own; they have to be added explicitly).
+
+| Gutter glyph | Meaning                              |
+|--------------+----------------------------------------|
+| ~┃~          | Added or changed line                 |
+| ~▁~          | Deletion below this line              |
+| ~▔~          | Deletion at the top of file           |
+| ~~~~         | Changed and then partially deleted    |
+| ~┆~          | Untracked line                        |
+
+If hunk actions (stage/reset/preview/navigate) are wanted later, they go in an ~on_attach~ callback in the gitsigns block in ~init.lua~ — see ~:h gitsigns-usage~ for the standard keymap recipe.
+
+* Treesitter
+
+Parsers installed via nvim-treesitter (main branch — a full rewrite of the plugin, different API/config shape than older guides describe): ~bash~, ~regex~, ~rust~, ~toml~, ~json~, ~yaml~, ~c~, ~lua~, ~vim~, ~vimdoc~, ~query~, ~markdown~, ~markdown_inline~.
+
+Highlighting is turned on per-filetype via a ~FileType~ autocmd calling ~vim.treesitter.start()~ (the new plugin doesn't do this for you) for: ~bash~, ~sh~, ~rust~, ~toml~, ~json~, ~yaml~, ~c~, ~lua~, ~vim~, ~markdown~. ~regex~, ~query~, ~vimdoc~, and ~markdown_inline~ aren't filetypes themselves — they're used automatically via language injection (e.g. Lua patterns highlighted as regex inside strings, ~:h~-doc highlighting inside vimdoc).
+
+Folding and indentation are *not* enabled (both are opt-in per the plugin's own docs, via ~foldexpr~/~indentexpr~ in a ~ftplugin~ or ~FileType~ autocmd) — left off here since neither was asked for and both add per-buffer overhead.
+
+Requires the standalone ~tree-sitter~ CLI (see Requirements above) — it's a separate tool from the ~libtree-sitter~ runtime library Neovim links against; installing only the library will make parser installs fail silently with ~ENOENT: tree-sitter~.
+
+* Noice (command line & messages UI)
+
+Configured with defaults (~opts = {}~). Replaces several built-in Neovim UI surfaces with floating windows:
+
+- The command line (~:~) becomes a floating popup instead of the bottom-line cmdline
+- ~:messages~, errors, and plugin notifications route through nvim-notify instead of the message history
+- LSP hover (~K~) and signature help render in Noice's floating style instead of the default ~vim.lsp.buf.hover~ window
+- Search count / search-as-you-type get a small virtual-text indicator near the cursor
+
+No custom keymaps are added by this config for Noice — everything above happens automatically once you type ~:~, trigger a message, or call ~K~.
+
+* Neovim health check notes
+
+A few things intentionally diverge from Neovim defaults, in case ~:checkhealth~ output looks different from a stock config:
+
+- ~vim.g.loaded_node_provider~, ~loaded_perl_provider~, ~loaded_python3_provider~, ~loaded_ruby_provider~ are all set to ~0~ — none of the installed plugins use those remote-plugin bridges, so they're disabled outright rather than leaving the "missing X package" warnings in ~:checkhealth vim.provider~.
+- lazy.nvim is configured with ~rocks = { enabled = false }~ — no plugin here needs luarocks, so lazy.nvim's ~hererocks~ bootstrap (which was failing) is skipped entirely instead of fixed.
+- ~:checkhealth lazy~ may still show ~found existing packages at .../site/pack/core~ — this is an empty directory Neovim 0.12 itself creates on every startup as part of its native ~vim.pack~ support, unrelated to this config or lazy.nvim; it reappears even after deleting it and is safe to ignore.
+
+* Statusline (lualine)
+
+~[mode | branch diff diagnostics | filename  macro]~      ~[LSP  selectioncount encoding format filetype | progress | line:col]~
+
+- Mode pill changes color per mode (normal=blue, insert=green, visual=pink, command=orange, replace=red)
+- Macro indicator appears when recording (~recording @q~)
+- LSP shows the active language server for the current file
+- Selection count shows chars/lines selected in visual mode
+
+Colors are hardcoded to the [[https://github.com/catppuccin/nvim][catppuccin frappe]] palette. If you switch themes, update the hex values in the lualine section of ~init.lua~.
+
+* Plugins
+
+| Plugin                     | Purpose                                                                              |
+|-----------------------------+----------------------------------------------------------------------------------------|
+| rustaceanvim                | Rust LSP, inlay hints, cargo commands                                                |
+| nvim-lspconfig              | LSP client config                                                                    |
+| nvim-treesitter             | Syntax highlighting                                                                  |
+| telescope.nvim              | Fuzzy finder                                                                         |
+| telescope-fzf-native.nvim   | Faster fuzzy sorter for Telescope (compiled)                                         |
+| nvim-cmp                    | Autocomplete                                                                         |
+| LuaSnip + cmp_luasnip       | Snippet engine — expands LSP snippet completions (e.g. rust-analyzer's filled-in function args) |
+| nvim-autopairs              | Auto-closes brackets/quotes                                                          |
+| mini.surround               | Add/change/delete surrounding pairs                                                  |
+| mini.ai                     | Better/extended text objects (arguments, function calls, nested levels)             |
+| mini.splitjoin              | Toggle bracketed constructs between one line and multi-line                          |
+| mini.hipatterns             | Live highlight of TODO/FIXME/HACK/NOTE and hex colors                                |
+| mini.indentscope            | Lightweight indent guide for the current scope only                                  |
+| which-key.nvim              | Shows available keybindings on leader press                                          |
+| catppuccin                  | Colorscheme (frappe)                                                                 |
+| lualine.nvim                | Statusline                                                                           |
+| neo-tree.nvim               | File explorer sidebar                                                                |
+| gitsigns.nvim               | Git diff signs in gutter                                                             |
+| vim-wakatime                | Coding time tracking (Hackatime)                                                     |
+| noice.nvim                  | Replaces cmdline/messages with floating UI                                           |
+| brainfuck-vim               | Brainfuck syntax support                                                             |
+
+* mini.nvim modules in detail
+
+All five below are from [[https://github.com/echasnovski/mini.nvim][mini.nvim]], a collection of ~35 independent single-purpose Lua modules — installing one doesn't pull in the others. Only these five are used here.
+
+** mini.surround
+
+Grammar: *action* + *target* + (for add) *surround identifier*.
+
+- ~sa{motion/textobj}{char}~ — *a*dd a surround around whatever the motion/textobject resolves to
+- ~sd{char}~ — *d*elete the nearest surround pair
+- ~sr{char1}{char2}~ — *r*eplace one surround with another
+- ~sf{char}~ / ~sF{char}~ — *f*ind the pair, move cursor to it
+- ~sh{char}~ — briefly *h*ighlight the pair (visual confirmation before acting)
+
+~{char}~ isn't limited to a literal key: ~b~ matches any of ~)]}~, ~q~ matches any of a double quote, single quote, or backtick, and ~t~ matches the nearest ~<tag>...</tag>~. It also finds pairs within a configurable line range (~n_lines~, default 20) so the cursor doesn't need to be exactly inside them, and every action is dot-repeatable (~.~ reruns the last surround action on the next target).
+
+*Why ~saiw"~ does what it does:* ~sa~ is a Neovim /operator/ — like ~d~ or ~y~, it does nothing by itself and waits for a motion/textobject to define the region it acts on. ~iw~ is not part of mini.surround at all; it's Neovim's built-in text object syntax (~i~ = inner, ~w~ = word), the same mechanism behind ~diw~/~ciw~. The final ~"~ answers mini.surround's implicit question "surround with what?" Because ~sa~ speaks Neovim's generic operator-pending protocol rather than hardcoding "word," it composes for free with any textobject — built-in ones or ones added by mini.ai below.
+
+** mini.ai
+
+Native ~i(~/~ip~/etc. only work if the cursor is already inside the target — stand a few characters before an opening ~(~ and native ~i(~ fails to find it. mini.ai replaces these with versions that search nearby text for the closest match, and adds objects Neovim doesn't have natively:
+
+- ~ia~ / ~aa~ — a single function *argument*, splitting correctly on top-level commas (ignores commas nested inside other parens/strings) — e.g. on ~fn foo(a: i32, b: Vec<T>)~, cursor in ~b: Vec<T>~, ~dia~ deletes just that argument
+- ~if~ / ~af~ — a function call or its arguments as a whole
+- ~2i)~ — count-prefixed to reach further-out enclosing levels, useful in nested generics like ~Result<Option<Vec<T>>, E>~
+- Fully custom specs can be defined (Lua pattern or function) for anything not covered
+
+Because mini.surround's ~sa~/~sd~/~sr~ just consume whatever textobject is given to them, mini.ai extends what those keys can target with no separate integration — e.g. ~saia"~ surrounds the current function argument in quotes.
+
+** mini.splitjoin
+
+One keymap, ~gS~, toggles a bracketed, comma-separated construct between single-line and multi-line, and reverses cleanly:
+
+#+BEGIN_EXAMPLE
+foo(a, b, c)     <gS>     foo(
+                   ↕          a,
+                              b,
+                              c
+                          )
+#+END_EXAMPLE
+
+Works on function calls/definitions, struct literals, arrays/tuples — anything comma-separated inside a bracket pair, respecting nesting (won't split on a comma inside a deeper bracket or string). Useful when a Rust function signature or struct literal gets too long to read comfortably, without fighting rustfmt — it still reformats on save regardless, this just makes the editing moment easier.
+
+** mini.hipatterns
+
+No keymap — a passive, live pattern highlighter that decorates matches as you type (debounced, Lua-pattern based rather than treesitter, so it's cheap). Configured here with two things:
+
+- ~TODO~ / ~FIXME~ / ~HACK~ / ~NOTE~ — each highlighted in a distinct color when found in comments (the same feature todo-comments.nvim provides as a dedicated plugin)
+- Hex colors (~#ff8800~) — rendered in the literal color they name
+
+Custom patterns can be added the same way — e.g. flagging ~.unwrap()~/~.expect(~ calls in Rust as a self-imposed "review before committing" marker.
+
+** mini.indentscope
+
+Configured here with ~draw.animation~ set to ~gen_animation.none()~ (no animation, instant draw) specifically to keep it cheap.
+
+Unlike a full indent-guide plugin (which draws a character on every indented line in the viewport, recomputed on every scroll/edit), this only computes and draws a guide for *one scope*: the contiguous block of lines at the same or deeper indent level as wherever the cursor currently sits. Moving the cursor into a different block redraws the guide for the new scope instead of adding to what's already drawn. Cost scales with the size of the current block, not with how much indented code is visible on screen — which is why this was chosen over indent-blankline.nvim (skipped specifically because its per-line, per-frame cost was the one item on the original recommendation list that could visibly drag on large files).
+
+It also provides:
+
+- ~ii~ / ~ai~ — text object for the current indent scope (~dai~ deletes the block the cursor is in, including its opening/closing lines)
+- ~[i~ / ~]i~ — jump to the scope's start/end border
+
+Tradeoff versus a full indent-guide plugin: you only see the indentation of the block you're currently in, not the whole file's nesting at a glance. For most editing that's a fine trade since you're always "in" the scope you're working on.
+
+* Rust LSP notes
+
+- Runs clippy on save (slower than ~cargo check~ but more thorough)
+- ~buildScripts~ enabled for future ~build.rs~ support — safe to leave on even if unused
+- Formats on save via rustfmt
+- Inlay hints (inferred types, param names) enabled automatically for any attached LSP client that supports them

@@ -12,6 +12,12 @@ vim.g.loaded_zipPlugin    = 1
 vim.g.loaded_tarPlugin    = 1
 vim.g.loaded_gzip         = 1
 
+-- disable unused providers (nothing in this config needs them)
+vim.g.loaded_node_provider    = 0
+vim.g.loaded_perl_provider    = 0
+vim.g.loaded_python3_provider = 0
+vim.g.loaded_ruby_provider    = 0
+
 -- ── Bootstrap lazy.nvim ────────────────────────────────────
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
@@ -49,12 +55,29 @@ require("lazy").setup({
   -- ── Existing plugins (migrated from vim-plug) ───────────
   { "mrcjkb/rustaceanvim", version = "^9", lazy = false },
   "neovim/nvim-lspconfig",
-  { "nvim-treesitter/nvim-treesitter", build = ":TSUpdate", event = "BufReadPost" },
+  {
+    "nvim-treesitter/nvim-treesitter",
+    build = ":TSUpdate",
+    lazy = false, -- nvim-treesitter (main) doesn't support lazy-loading
+    config = function()
+      require("nvim-treesitter").install({
+        "bash", "regex", "rust", "toml", "json", "yaml",
+        "c", "lua", "vim", "vimdoc", "query", "markdown", "markdown_inline",
+      })
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = { "bash", "sh", "rust", "toml", "json", "yaml", "c", "lua", "vim", "markdown" },
+        callback = function() vim.treesitter.start() end,
+      })
+    end,
+  },
 
   {
     "nvim-telescope/telescope.nvim",
     tag = "0.1.8",
-    dependencies = { "nvim-lua/plenary.nvim" },
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
+    },
     config = function()
       require("telescope").setup({
         defaults = {
@@ -63,6 +86,7 @@ require("lazy").setup({
           },
         },
       })
+      require("telescope").load_extension("fzf")
       local builtin = require("telescope.builtin")
       vim.keymap.set("n", "<leader>ff", builtin.find_files)
       vim.keymap.set("n", "<leader>fg", builtin.live_grep)
@@ -75,16 +99,30 @@ require("lazy").setup({
   {
     "hrsh7th/nvim-cmp",
     event = { "InsertEnter", "CmdlineEnter" },
-    dependencies = { "hrsh7th/cmp-nvim-lsp", "hrsh7th/cmp-cmdline" },
+    dependencies = {
+      "hrsh7th/cmp-nvim-lsp",
+      "hrsh7th/cmp-cmdline",
+      "L3MON4D3/LuaSnip",
+      "saadparwaiz1/cmp_luasnip",
+    },
     config = function()
       local cmp = require("cmp")
+      local luasnip = require("luasnip")
       cmp.setup({
+        snippet = {
+          expand = function(args)
+            luasnip.lsp_expand(args.body)
+          end,
+        },
         mapping = cmp.mapping.preset.insert({
           ["<Tab>"]   = cmp.mapping.select_next_item(),
           ["<S-Tab>"] = cmp.mapping.select_prev_item(),
           ["<CR>"]    = cmp.mapping.confirm({ select = true }),
         }),
-        sources = { { name = "nvim_lsp" } },
+        sources = {
+          { name = "nvim_lsp" },
+          { name = "luasnip" },
+        },
       })
       cmp.setup.cmdline(":", {
         mapping = cmp.mapping.preset.cmdline(),
@@ -93,6 +131,58 @@ require("lazy").setup({
     end,
   },
   { "fruit-in/brainfuck-vim", ft = "brainfuck" },
+
+  -- ── Editing QoL ─────────────────────────────────────────
+  {
+    "windwp/nvim-autopairs",
+    event = "InsertEnter",
+    opts = {},
+  },
+  {
+    "echasnovski/mini.surround",
+    event = "VeryLazy",
+    opts = {},
+  },
+  {
+    "echasnovski/mini.ai",
+    event = "VeryLazy",
+    opts = {},
+  },
+  {
+    "echasnovski/mini.splitjoin",
+    keys = { { "gS", desc = "Toggle split/join" } },
+    opts = {},
+  },
+  {
+    "echasnovski/mini.hipatterns",
+    event = "BufReadPre",
+    config = function()
+      local hipatterns = require("mini.hipatterns")
+      hipatterns.setup({
+        highlighters = {
+          fixme = { pattern = "%f[%w]()FIXME()%f[%W]", group = "MiniHipatternsFixme" },
+          hack  = { pattern = "%f[%w]()HACK()%f[%W]",  group = "MiniHipatternsHack" },
+          todo  = { pattern = "%f[%w]()TODO()%f[%W]",  group = "MiniHipatternsTodo" },
+          note  = { pattern = "%f[%w]()NOTE()%f[%W]",  group = "MiniHipatternsNote" },
+          hex_color = hipatterns.gen_highlighter.hex_color(),
+        },
+      })
+    end,
+  },
+  {
+    "echasnovski/mini.indentscope",
+    event = "BufReadPre",
+    config = function()
+      require("mini.indentscope").setup({
+        draw = { animation = require("mini.indentscope").gen_animation.none() },
+      })
+    end,
+  },
+  {
+    "folke/which-key.nvim",
+    event = "VeryLazy",
+    opts = {},
+  },
 
   -- ── Theme ───────────────────────────────────────────────
   {
@@ -207,6 +297,8 @@ require("lazy").setup({
 
   -- ── WakaTime ────────────────────────────────────────────
   { "wakatime/vim-wakatime", lazy = false },
+}, {
+  rocks = { enabled = false }, -- no plugins need luarocks; skip hererocks install
 })
 
 -- ── Rust globals ───────────────────────────────────────────
@@ -222,6 +314,16 @@ vim.g.rustaceanvim = {
     },
   },
 }
+
+-- ── Inlay hints ────────────────────────────────────────────
+vim.api.nvim_create_autocmd("LspAttach", {
+  callback = function(args)
+    local client = vim.lsp.get_client_by_id(args.data.client_id)
+    if client and client:supports_method("textDocument/inlayHint") then
+      vim.lsp.inlay_hint.enable(true, { bufnr = args.buf })
+    end
+  end,
+})
 
 -- ── Format on save ────────────────────────────────────────
 vim.api.nvim_create_autocmd("BufWritePre", {
