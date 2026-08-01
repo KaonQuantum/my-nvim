@@ -128,6 +128,8 @@ nvim-cmp pulls completions from the active LSP client (~nvim_lsp~ source) and fr
 
 *Known limitation:* when an LSP completion is snippet-flavored (e.g. rust-analyzer filling in ~Some(${1:value})~ or a function call's arguments), confirming it expands correctly via LuaSnip and drops your cursor in the first placeholder — but there's currently no keymap bound to jump to the /next/ placeholder (LuaSnip's ~jump_next()~/~jump_prev()~). Cursor stays at the first placeholder until you tab/arrow out manually. Worth adding ~<C-j>~/~<C-k>~ (or similar) mapped to LuaSnip's jump functions if multi-placeholder snippets come up often.
 
+LuaSnip's ~build~ step runs ~make install_jsregexp~ automatically on install (needs ~make~ + a C compiler, same as the Requirements above) — this compiles the native ~jsregexp~ library used for regex-based variable/placeholder transformations in snippets. Not required for ordinary snippet expansion; only matters if a snippet definition uses a transform function.
+
 * Git signs (gitsigns.nvim)
 
 Configured with ~require("gitsigns").setup()~ and no custom ~on_attach~ — so it currently only draws gutter signs, it does *not* add any hunk-navigation or stage/reset keymaps (gitsigns doesn't bind any on its own; they have to be added explicitly).
@@ -154,12 +156,14 @@ Requires the standalone ~tree-sitter~ CLI (see Requirements above) — it's a se
 
 * Noice (command line & messages UI)
 
-Configured with defaults (~opts = {}~). Replaces several built-in Neovim UI surfaces with floating windows:
+Replaces several built-in Neovim UI surfaces with floating windows:
 
 - The command line (~:~) becomes a floating popup instead of the bottom-line cmdline
 - ~:messages~, errors, and plugin notifications route through nvim-notify instead of the message history
 - LSP hover (~K~) and signature help render in Noice's floating style instead of the default ~vim.lsp.buf.hover~ window
 - Search count / search-as-you-type get a small virtual-text indicator near the cursor
+
+Noice ships three additional LSP/completion markdown overrides that default to *off* even though hover/signature are on by default: ~vim.lsp.util.convert_input_to_markdown_lines~, ~vim.lsp.util.stylize_markdown~, and ~cmp.entry.get_documentation~. All three are explicitly enabled here (~opts.lsp.override~) so LSP docs and completion-menu documentation render through Noice consistently instead of only hover/signature help.
 
 No custom keymaps are added by this config for Noice — everything above happens automatically once you type ~:~, trigger a message, or call ~K~.
 
@@ -170,6 +174,8 @@ A few things intentionally diverge from Neovim defaults, in case ~:checkhealth~ 
 - ~vim.g.loaded_node_provider~, ~loaded_perl_provider~, ~loaded_python3_provider~, ~loaded_ruby_provider~ are all set to ~0~ — none of the installed plugins use those remote-plugin bridges, so they're disabled outright rather than leaving the "missing X package" warnings in ~:checkhealth vim.provider~.
 - lazy.nvim is configured with ~rocks = { enabled = false }~ — no plugin here needs luarocks, so lazy.nvim's ~hererocks~ bootstrap (which was failing) is skipped entirely instead of fixed.
 - ~:checkhealth lazy~ may still show ~found existing packages at .../site/pack/core~ — this is an empty directory Neovim 0.12 itself creates on every startup as part of its native ~vim.pack~ support, unrelated to this config or lazy.nvim; it reappears even after deleting it and is safe to ignore.
+- ~:checkhealth vim.pack~ separately warns ~Lockfile is absent, plugin directory is present~ — same root cause as above. ~vim.pack~ is Neovim's own built-in package manager (distinct from lazy.nvim), and this config doesn't use it at all; the warning just means Neovim created the directory but ~vim.pack.add()~ was never called. No action possible or needed.
+- ~:checkhealth which-key~ lists a batch of "overlapping keymaps" (~sd~ vs ~sdn~/~sdl~, ~i~ vs ~in~/~il~, ~gc~ vs ~gcc~, etc.) — these are intentional directional-variant keymaps from mini.surround/mini.ai and Neovim's built-in comment operator, not conflicts. which-key's own health check explicitly says these are informational only.
 
 * Statusline (lualine)
 
@@ -199,6 +205,7 @@ Colors are hardcoded to the [[https://github.com/catppuccin/nvim][catppuccin fra
 | mini.splitjoin              | Toggle bracketed constructs between one line and multi-line                          |
 | mini.hipatterns             | Live highlight of TODO/FIXME/HACK/NOTE and hex colors                                |
 | mini.indentscope            | Lightweight indent guide for the current scope only                                  |
+| mini.icons                  | Icon provider for lualine/neo-tree/which-key (replaces nvim-web-devicons)             |
 | which-key.nvim              | Shows available keybindings on leader press                                          |
 | catppuccin                  | Colorscheme (frappe)                                                                 |
 | lualine.nvim                | Statusline                                                                           |
@@ -210,7 +217,7 @@ Colors are hardcoded to the [[https://github.com/catppuccin/nvim][catppuccin fra
 
 * mini.nvim modules in detail
 
-All five below are from [[https://github.com/echasnovski/mini.nvim][mini.nvim]], a collection of ~35 independent single-purpose Lua modules — installing one doesn't pull in the others. Only these five are used here.
+All six below are from [[https://github.com/echasnovski/mini.nvim][mini.nvim]], a collection of ~35 independent single-purpose Lua modules — installing one doesn't pull in the others. Only these six are used here.
 
 ** mini.surround
 
@@ -272,6 +279,14 @@ It also provides:
 - ~[i~ / ~]i~ — jump to the scope's start/end border
 
 Tradeoff versus a full indent-guide plugin: you only see the indentation of the block you're currently in, not the whole file's nesting at a glance. For most editing that's a fine trade since you're always "in" the scope you're working on.
+
+** mini.icons
+
+An icon provider — maps filenames/extensions/filetypes/LSP-kind categories to an icon glyph + highlight color. Loaded with ~lazy = false, priority = 1000~ so it's available before anything else in the plugin list needs icons.
+
+lualine.nvim and neo-tree.nvim both hard-require ~"nvim-web-devicons"~ specifically rather than checking for mini.icons first, so on its own installing mini.icons wouldn't change what they draw from. To make icons actually consistent across the whole config, mini.icons' setup also calls ~mock_nvim_web_devicons()~, which makes ~require("nvim-web-devicons")~ transparently return mini.icons' data instead of loading the real plugin. ~nvim-web-devicons~ was then removed from lualine's and neo-tree's ~dependencies~ entirely — it's no longer installed on disk, everything resolves through mini.icons.
+
+Practical effect of the mock: health checks and any plugin code that does "can I require nvim-web-devicons" will report success even though the real plugin isn't present — that's expected, not a leftover dependency.
 
 * Rust LSP notes
 

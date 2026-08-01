@@ -102,7 +102,7 @@ require("lazy").setup({
     dependencies = {
       "hrsh7th/cmp-nvim-lsp",
       "hrsh7th/cmp-cmdline",
-      "L3MON4D3/LuaSnip",
+      { "L3MON4D3/LuaSnip", build = "make install_jsregexp" },
       "saadparwaiz1/cmp_luasnip",
     },
     config = function()
@@ -137,6 +137,15 @@ require("lazy").setup({
     "windwp/nvim-autopairs",
     event = "InsertEnter",
     opts = {},
+  },
+  {
+    "echasnovski/mini.icons",
+    lazy = false,
+    priority = 1000, -- load before lualine/neo-tree/which-key so the mock is in place first
+    config = function()
+      require("mini.icons").setup()
+      require("mini.icons").mock_nvim_web_devicons()
+    end,
   },
   {
     "echasnovski/mini.surround",
@@ -199,7 +208,7 @@ require("lazy").setup({
   {
     "nvim-lualine/lualine.nvim",
     event = "VeryLazy",
-    dependencies = { "nvim-tree/nvim-web-devicons", "catppuccin/nvim" },
+    dependencies = { "catppuccin/nvim" },
     config = function()
       local cd = {
         blue    = "#8caaee",  -- blue
@@ -262,7 +271,15 @@ require("lazy").setup({
     "folke/noice.nvim",
     event = "VeryLazy",
     dependencies = { "MunifTanjim/nui.nvim", "rcarriga/nvim-notify" },
-    opts = {},
+    opts = {
+      lsp = {
+        override = {
+          ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
+          ["vim.lsp.util.stylize_markdown"] = true,
+          ["cmp.entry.get_documentation"] = true,
+        },
+      },
+    },
   },
 
   -- ── File explorer ───────────────────────────────────────
@@ -271,7 +288,6 @@ require("lazy").setup({
     branch = "v3.x",
     dependencies = {
       "nvim-lua/plenary.nvim",
-      "nvim-tree/nvim-web-devicons",
       "MunifTanjim/nui.nvim",
     },
     keys = {
