@@ -364,8 +364,8 @@ map("n", "K",          "<cmd>lua vim.lsp.buf.hover()<CR>",          { desc = "Ho
 map("n", "<leader>ca", "<cmd>lua vim.lsp.buf.code_action()<CR>",   { desc = "Code action"       })
 map("n", "<leader>rn", "<cmd>lua vim.lsp.buf.rename()<CR>",        { desc = "Rename symbol"     })
 map("n", "<leader>e",  "<cmd>lua vim.diagnostic.open_float()<CR>", { desc = "Diagnostics float" })
-map("n", "]d", "<cmd>lua vim.diagnostic.goto_next()<CR>",                                                          { desc = "Next diagnostic" })
-map("n", "[d", "<cmd>lua vim.diagnostic.goto_prev()<CR>",                                                          { desc = "Prev diagnostic" })
-map("n", "]e", "<cmd>lua vim.diagnostic.goto_next({ severity = vim.diagnostic.severity.ERROR })<CR>",             { desc = "Next error" })
-map("n", "[e", "<cmd>lua vim.diagnostic.goto_prev({ severity = vim.diagnostic.severity.ERROR })<CR>",             { desc = "Prev error" })
+map("n", "]d", "<cmd>lua vim.diagnostic.jump({ count = 1 })<CR>",                                                  { desc = "Next diagnostic" })
+map("n", "[d", "<cmd>lua vim.diagnostic.jump({ count = -1 })<CR>",                                                 { desc = "Prev diagnostic" })
+map("n", "]e", "<cmd>lua vim.diagnostic.jump({ count = 1, severity = vim.diagnostic.severity.ERROR })<CR>",        { desc = "Next error" })
+map("n", "[e", "<cmd>lua vim.diagnostic.jump({ count = -1, severity = vim.diagnostic.severity.ERROR })<CR>",       { desc = "Prev error" })
 
