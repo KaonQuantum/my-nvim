@@ -326,6 +326,9 @@ vim.g.rustaceanvim = {
         checkOnSave = true,
         cargo = { buildScripts = { enable = true } },
         check = { command = "clippy" },
+        rustfmt = {
+          extraArgs = { "+nightly", "--config-path", vim.fn.expand("~/.rustfmt.toml") },
+        },
       },
     },
   },
