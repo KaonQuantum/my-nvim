@@ -195,12 +195,12 @@ require("lazy").setup({
 
   -- ── Theme ───────────────────────────────────────────────
   {
-    "catppuccin/nvim",
-    name = "catppuccin",
+    "nyxvamp-theme/neovim",
+    name = "nyxvamp",
     priority = 1000,
     config = function()
-      require("catppuccin").setup({ flavour = "frappe" })
-      vim.cmd("colorscheme catppuccin")
+      require("nyxvamp").setup({ variant = "veil" })
+      require("nyxvamp").load()
     end,
   },
 
@@ -208,19 +208,19 @@ require("lazy").setup({
   {
     "nvim-lualine/lualine.nvim",
     event = "VeryLazy",
-    dependencies = { "catppuccin/nvim" },
+    dependencies = { "nyxvamp-theme/neovim" },
     config = function()
       local cd = {
-        blue    = "#8caaee",  -- blue
-        green   = "#a6d189",  -- green
-        mauve   = "#ca9ee6",  -- mauve
-        peach   = "#ef9f76",  -- peach
-        red     = "#e78284",  -- red
-        lavender = "#babbf1", -- lavender
-        bg      = "#303446",  -- base
-        bg_hl   = "#414559",  -- surface0
-        fg      = "#c6d0f5",  -- text
-        fg_dark = "#737994",  -- overlay0
+        blue    = "#96cdfb",  -- syntaxFunction / linkText
+        green   = "#a6da95",  -- successText
+        mauve   = "#f5c2e7",  -- syntaxKeyword / emphasisText
+        peach   = "#e5c890",  -- warningText (veil has no orange, closest warm accent)
+        red     = "#e78284",  -- errorText
+        lavender = "#d9e0ee", -- mainText
+        bg      = "#1e1e2e",  -- editorBackground
+        bg_hl   = "#313244",  -- windowBorder / menuOptionBackground
+        fg      = "#d9e0ee",  -- mainText
+        fg_dark = "#6e6a86",  -- commentText / inactiveText
       }
 
       local theme = {
