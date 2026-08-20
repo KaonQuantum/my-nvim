@@ -199,7 +199,15 @@ require("lazy").setup({
     name = "nyxvamp",
     priority = 1000,
     config = function()
-      require("nyxvamp").setup({ variant = "veil" })
+      require("nyxvamp").setup({
+          variant = "veil",
+          transparent = false,
+          comments = true,
+          keywords = true,
+          functions = false,
+          strings = true,
+          variables = false,
+      })
       require("nyxvamp").load()
     end,
   },
