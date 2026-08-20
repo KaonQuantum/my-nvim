@@ -202,11 +202,13 @@ require("lazy").setup({
       require("nyxvamp").setup({
           variant = "veil",
           transparent = false,
-          comments = true,
-          keywords = true,
-          functions = false,
-          strings = true,
-          variables = false,
+          italics = {
+            comments = true,
+            keywords = true,
+            functions = false,
+            strings = true,
+            variables = false,
+          },
       })
       require("nyxvamp").load()
     end,
