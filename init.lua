@@ -195,22 +195,14 @@ require("lazy").setup({
 
   -- ── Theme ───────────────────────────────────────────────
   {
-    "nyxvamp-theme/neovim",
-    name = "nyxvamp",
+    "rebelot/kanagawa.nvim",
+    name = "kanagawa",
     priority = 1000,
     config = function()
-      require("nyxvamp").setup({
-          variant = "veil",
-          transparent = false,
-          italics = {
-            comments = true,
-            keywords = true,
-            functions = false,
-            strings = true,
-            variables = false,
-          },
+      require("kanagawa").setup({
+          background = { dark = "dragon" },
       })
-      require("nyxvamp").load()
+      vim.cmd.colorscheme("kanagawa-dragon")
     end,
   },
 
@@ -218,19 +210,19 @@ require("lazy").setup({
   {
     "nvim-lualine/lualine.nvim",
     event = "VeryLazy",
-    dependencies = { "nyxvamp-theme/neovim" },
+    dependencies = { "rebelot/kanagawa.nvim" },
     config = function()
       local cd = {
-        blue    = "#96cdfb",  -- syntaxFunction / linkText
-        green   = "#a6da95",  -- successText
-        mauve   = "#f5c2e7",  -- syntaxKeyword / emphasisText
-        peach   = "#e5c890",  -- warningText (veil has no orange, closest warm accent)
-        red     = "#e78284",  -- errorText
-        lavender = "#d9e0ee", -- mainText
-        bg      = "#1e1e2e",  -- editorBackground
-        bg_hl   = "#313244",  -- windowBorder / menuOptionBackground
-        fg      = "#d9e0ee",  -- mainText
-        fg_dark = "#6e6a86",  -- commentText / inactiveText
+        blue    = "#658594",  -- dragonBlue, kanagawa's own diag.info
+        green   = "#98BB6C",  -- springGreen, kanagawa's own diag.ok
+        mauve   = "#a292a3",  -- dragonPink, kanagawa's own ANSI magenta
+        peach   = "#FF9E3B",  -- roninYellow, kanagawa's own diag.warning
+        red     = "#E82424",  -- samuraiRed, kanagawa's own diag.error
+        lavender = "#C8C093", -- oldWhite, kanagawa's own StatusLine fg
+        bg      = "#0d0c0c",  -- dragonBlack0, kanagawa's own StatusLine bg (ui.bg_m3)
+        bg_hl   = "#282727",  -- dragonBlack4, ui.bg_p1 (matches TabLineSel bg)
+        fg      = "#C8C093",  -- oldWhite, kanagawa's own StatusLine fg
+        fg_dark = "#625e5a",  -- dragonBlack6, ui.nontext (kanagawa's own StatusLineNC fg)
       }
 
       local theme = {
@@ -290,6 +282,37 @@ require("lazy").setup({
         },
       },
     },
+    config = function(_, opts)
+      require("noice").setup(opts)
+      -- kanagawa gives DiagnosticSignInfo/Warn an opaque gutter background,
+      -- which noice's cmdline/confirm borders link to, leaving a mismatched
+      -- box behind them against the popup's own borderless background.
+      -- noice (re)applies its own highlights via vim.schedule/ColorScheme,
+      -- so this must also be scheduled to run after that, not before it.
+      local function fix_noice_borders()
+        for _, hl in ipairs({
+          "NoiceCmdlinePopupBorder",
+          "NoiceCmdlinePopupTitle",
+          "NoiceCmdlinePopupBorderSearch",
+          "NoiceConfirmBorder",
+          "NoiceCmdlineIcon",
+          "NoiceCmdlineIconSearch",
+        }) do
+          -- these are defined as links, so re-linking with an added bg is a
+          -- no-op (nvim_set_hl drops sibling attrs when `link` is present);
+          -- resolve the link's actual fg first, then redefine unlinked.
+          local ok, resolved = pcall(vim.api.nvim_get_hl, 0, { name = hl, link = false })
+          if ok and resolved.fg then
+            vim.api.nvim_set_hl(0, hl, { fg = resolved.fg, bg = "NONE" })
+          end
+        end
+      end
+      local function schedule_fix()
+        vim.schedule(fix_noice_borders)
+      end
+      schedule_fix()
+      vim.api.nvim_create_autocmd("ColorScheme", { callback = schedule_fix })
+    end,
   },
 
   -- ── File explorer ───────────────────────────────────────
